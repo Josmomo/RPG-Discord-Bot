@@ -3,6 +3,7 @@ package client
 import (
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Josmomo/RPG-Discord-Bot/commands"
 	"github.com/Josmomo/RPG-Discord-Bot/constants"
@@ -78,6 +79,10 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		// Do nothing, a bot wrote this message
 		return
 	}
+	defer func() { // Delete handled message from the user after a while
+		time.Sleep(time.Second * 15)
+		session.ChannelMessageDelete(channelID, message.ID)
+	}()
 
 	command, args, err := parseMessage(message.Content)
 	if err != nil {
