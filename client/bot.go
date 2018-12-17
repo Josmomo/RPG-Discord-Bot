@@ -29,6 +29,14 @@ func CreateBot() *Bot {
 func (bot *Bot) Run() {
 	var err error
 
+	// Create MongoDBClient
+	mongoDBClient, err := CreateNewClient()
+	if err != nil {
+		logrus.WithFields(utils.Locate()).Error(err.Error())
+		return
+	}
+	defer mongoDBClient.session.Close()
+
 	// Create a new Discord session
 	bot.session, err = discordgo.New("Bot " + constants.Token)
 	if err != nil {
