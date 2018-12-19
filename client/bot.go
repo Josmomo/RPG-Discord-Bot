@@ -6,6 +6,7 @@ import (
 
 	"github.com/Josmomo/RPG-Discord-Bot/commands"
 	"github.com/Josmomo/RPG-Discord-Bot/constants"
+	"github.com/Josmomo/RPG-Discord-Bot/database"
 	"github.com/Josmomo/RPG-Discord-Bot/utils"
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
@@ -13,10 +14,11 @@ import (
 
 //Bot struct
 type Bot struct {
-	ID           string
-	session      *discordgo.Session
-	user         *discordgo.User
-	closeChannel chan bool
+	ID            string
+	session       *discordgo.Session
+	user          *discordgo.User
+	closeChannel  chan bool
+	mongoDBClient database.MongoDBClient
 }
 
 //CreateBot create and returns a new Bot
@@ -30,12 +32,13 @@ func (bot *Bot) Run() {
 	var err error
 
 	// Create MongoDBClient
-	mongoDBClient, err := CreateNewClient()
+	mongoDBClient, err := database.CreateNewClient()
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return
 	}
-	defer mongoDBClient.session.Close()
+	bot.mongoDBClient = mongoDBClient
+	//defer bot.mongoDBClient.Session.Close()
 
 	// Create a new Discord session
 	bot.session, err = discordgo.New("Bot " + constants.Token)
@@ -100,7 +103,7 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 			return
 		}
 	case commands.CommandAdd:
-		err := commands.Add(session, message, args)
+		err := commands.Add(bot.mongoDBClient, session, message, args)
 		if err != nil {
 			return
 		}
