@@ -112,6 +112,11 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		if err != nil {
 			return
 		}
+	case commands.CommandRemove:
+		err := commands.Remove(bot.mongoDBClient, session, message, args)
+		if err != nil {
+			return
+		}
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
 	}

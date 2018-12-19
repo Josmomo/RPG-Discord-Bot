@@ -10,11 +10,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//CommandAdd
-const CommandAdd = "add"
+//CommandRemove
+const CommandRemove = "remove"
 
-//Add
-func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
+//Remove
+func Remove(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
 	weekdays, err := parseAddArgs(args)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
@@ -30,25 +30,25 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 		//return err
 	}
 	if utils.ContainsInt(weekdays, 1) {
-		entry.Monday = true
+		entry.Monday = false
 	}
 	if utils.ContainsInt(weekdays, 2) {
-		entry.Tuesday = true
+		entry.Tuesday = false
 	}
 	if utils.ContainsInt(weekdays, 3) {
-		entry.Wednesday = true
+		entry.Wednesday = false
 	}
 	if utils.ContainsInt(weekdays, 4) {
-		entry.Thursday = true
+		entry.Thursday = false
 	}
 	if utils.ContainsInt(weekdays, 5) {
-		entry.Friday = true
+		entry.Friday = false
 	}
 	if utils.ContainsInt(weekdays, 6) {
-		entry.Saturday = true
+		entry.Saturday = false
 	}
 	if utils.ContainsInt(weekdays, 7) {
-		entry.Sunday = true
+		entry.Sunday = false
 	}
 
 	err = mongoDBClient.UpsertWeek(entry)
@@ -60,7 +60,7 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 	return nil
 }
 
-func parseAddArgs(adds []string) ([]int, error) {
+func parseRemoveArgs(adds []string) ([]int, error) {
 	regexpAdd := regexp.MustCompile(`^[1234567]$`)
 	ret := []int{}
 
