@@ -101,24 +101,21 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		return
 	}
 
+	commandErr := error(nil)
 	switch command {
 	case commands.CommandRoll:
-		err := commands.Roll(session, message, args)
-		if err != nil {
-			return
-		}
+		commandErr = commands.Roll(session, message, args)
 	case commands.CommandAdd:
-		err := commands.Add(bot.mongoDBClient, session, message, args)
-		if err != nil {
-			return
-		}
+		commandErr = commands.Add(bot.mongoDBClient, session, message, args)
 	case commands.CommandRemove:
-		err := commands.Remove(bot.mongoDBClient, session, message, args)
-		if err != nil {
-			return
-		}
+		commandErr = commands.Remove(bot.mongoDBClient, session, message, args)
+	case commands.CommandCheckWeek:
+		commandErr = commands.CheckWeek(bot.mongoDBClient, session, message, args)
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
+	}
+	if commandErr != nil {
+		return
 	}
 }
 

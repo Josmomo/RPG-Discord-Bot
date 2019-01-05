@@ -60,13 +60,13 @@ func Remove(mongoDBClient database.MongoDBClient, session *discordgo.Session, me
 	return nil
 }
 
-func parseRemoveArgs(adds []string) ([]int, error) {
-	regexpAdd := regexp.MustCompile(`^[1234567]$`)
+func parseRemoveArgs(removes []string) ([]int, error) {
+	regexpRemove := regexp.MustCompile(`^[1234567]$`)
 	ret := []int{}
 
-	for _, add := range adds {
-		if regexpAdd.MatchString(add) {
-			day, err := strconv.Atoi(add)
+	for _, remove := range removes {
+		if regexpRemove.MatchString(remove) {
+			day, err := strconv.Atoi(remove)
 			if err != nil {
 				logrus.WithFields(utils.Locate()).Error(err.Error())
 				return []int{}, err
