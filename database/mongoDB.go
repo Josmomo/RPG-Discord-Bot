@@ -35,6 +35,11 @@ type ScheduleWeekFindQuery struct {
 	week   int    `bson:"week"`
 }
 
+type ScheduleWeekAllUsersFindQuery struct {
+	year int `bson:"year"`
+	week int `bson:"week"`
+}
+
 //CreateNewClient creates a new client
 func CreateNewClient() (MongoDBClient, error) {
 	client := MongoDBClient{}
@@ -64,7 +69,7 @@ func CreateNewClient() (MongoDBClient, error) {
 }
 
 func (mongoDBClient *MongoDBClient) UpsertWeek(entry ScheduleWeek) error {
-	query := ScheduleWeekFindQuery{userID: entry.UserID, year: entry.Year, week: entry.Week}
+	query := bson.M{"userID": entry.UserID, "year": entry.Year, "week": entry.Week}
 	_, err := mongoDBClient.Session.DB(constants.DataBaseName).C(constants.ScheduleCollection).Upsert(query, bson.M{"$set": entry})
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
@@ -73,8 +78,20 @@ func (mongoDBClient *MongoDBClient) UpsertWeek(entry ScheduleWeek) error {
 	return nil
 }
 
-func (mongoDBClient *MongoDBClient) GetWeek(query ScheduleWeek) ([]ScheduleWeek, error) {
+func (mongoDBClient *MongoDBClient) GetWeek(entry ScheduleWeek) ([]ScheduleWeek, error) {
 	ret := []ScheduleWeek{}
+	query := bson.M{
+		"userID":    entry.UserID,
+		"year":      entry.Year,
+		"week":      entry.Week,
+		"monday":    entry.Monday,
+		"tuesday":   entry.Tuesday,
+		"wednesday": entry.Wednesday,
+		"thursday":  entry.Thursday,
+		"friday":    entry.Friday,
+		"saturday":  entry.Saturday,
+		"sunday":    entry.Sunday,
+	}
 	err := mongoDBClient.Session.DB(constants.DataBaseName).C(constants.ScheduleCollection).Find(query).All(&ret)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
@@ -86,8 +103,20 @@ func (mongoDBClient *MongoDBClient) GetWeek(query ScheduleWeek) ([]ScheduleWeek,
 //GetDocFromIndex returns a single doc matching the index
 func (mongoDBClient *MongoDBClient) GetDocFromIndex(uID string, y int, w int) (ScheduleWeek, error) {
 	ret := ScheduleWeek{}
-	query := ScheduleWeekFindQuery{userID: uID, year: y, week: w}
+	query := bson.M{"userID": uID, "year": y, "week": w}
 	err := mongoDBClient.Session.DB(constants.DataBaseName).C(constants.ScheduleCollection).Find(query).One(&ret)
+	if err != nil {
+		logrus.WithFields(utils.Locate()).Error(err.Error())
+		return ret, err
+	}
+	return ret, nil
+}
+
+//GetDocsFromIndex returns multiple docs matching the index
+func (mongoDBClient *MongoDBClient) GetDocsFromIndex(y int, w int) ([]ScheduleWeek, error) {
+	ret := []ScheduleWeek{}
+	query := bson.M{"year": y, "week": w}
+	err := mongoDBClient.Session.DB(constants.DataBaseName).C(constants.ScheduleCollection).Find(query).All(&ret)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return ret, err
