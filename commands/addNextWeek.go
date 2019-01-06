@@ -10,17 +10,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//CommandAdd
-const CommandAdd = "add"
+//CommandAddNextWeek
+const CommandAddNextWeek = "addNextWeek"
 
-//Add
-func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
+//AddNextWeek
+func AddNextWeek(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
 	weekdays, err := parseAddArgs(args)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err
 	}
-	year, week, err := utils.GetYearWeek()
+	year, week, err := utils.GetYearWeekNext()
 	entry, err := mongoDBClient.GetDocFromIndex(message.Author.Mention(), year, week)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
@@ -59,7 +59,7 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 	return nil
 }
 
-func parseAddArgs(adds []string) ([]int, error) {
+func parseAddNextWeekArgs(adds []string) ([]int, error) {
 	regexpAdd := regexp.MustCompile(`^[1234567]$`)
 	ret := []int{}
 

@@ -107,6 +107,8 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		commandErr = commands.Roll(session, message, args)
 	case commands.CommandAdd:
 		commandErr = commands.Add(bot.mongoDBClient, session, message, args)
+	case commands.CommandAddNextWeek:
+		commandErr = commands.AddNextWeek(bot.mongoDBClient, session, message, args)
 	case commands.CommandRemove:
 		commandErr = commands.Remove(bot.mongoDBClient, session, message, args)
 	case commands.CommandCheckWeek:
