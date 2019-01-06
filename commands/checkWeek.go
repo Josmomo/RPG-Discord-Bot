@@ -37,7 +37,7 @@ func CheckWeek(mongoDBClient database.MongoDBClient, session *discordgo.Session,
 	stringSaturday := "\nSaturday:"
 	stringSunday := "\nSunday:"
 	for _, entry := range entries {
-		s := " " + entry.UserID
+		s := " " + entry.UserName
 		if entry.Monday {
 			stringMonday += s
 		}

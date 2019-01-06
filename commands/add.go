@@ -21,13 +21,15 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 		return err
 	}
 	year, week, err := utils.GetYearWeek()
-	entry, err := mongoDBClient.GetDocFromIndex(message.Author.Mention(), year, week)
+	entry, err := mongoDBClient.GetDocFromIndex(message.Author.ID, year, week)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
-		entry.UserID = message.Author.Mention()
+		entry.UserID = message.Author.ID
+		entry.UserName = message.Author.Username
 		entry.Year = year
 		entry.Week = week
 	}
+	entry.UserName = message.Author.Username
 	if utils.ContainsInt(weekdays, 1) {
 		entry.Monday = true
 	}

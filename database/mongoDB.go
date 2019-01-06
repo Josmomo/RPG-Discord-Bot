@@ -18,6 +18,7 @@ type MongoDBClient struct {
 
 type ScheduleWeek struct {
 	UserID    string `bson:"userID"`
+	UserName  string `bson:"userName"`
 	Year      int    `bson:"year"`
 	Week      int    `bson:"week"`
 	Monday    bool   `bson:"monday"`
@@ -82,6 +83,7 @@ func (mongoDBClient *MongoDBClient) GetWeek(entry ScheduleWeek) ([]ScheduleWeek,
 	ret := []ScheduleWeek{}
 	query := bson.M{
 		"userID":    entry.UserID,
+		"userName":  entry.UserName,
 		"year":      entry.Year,
 		"week":      entry.Week,
 		"monday":    entry.Monday,
