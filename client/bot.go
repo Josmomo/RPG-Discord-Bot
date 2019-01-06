@@ -3,7 +3,6 @@ package client
 import (
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/Josmomo/RPG-Discord-Bot/commands"
 	"github.com/Josmomo/RPG-Discord-Bot/constants"
@@ -90,10 +89,6 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		// Do nothing, a bot wrote this message
 		return
 	}
-	defer func() { // Delete handled message from the user after a while
-		time.Sleep(time.Second * 15)
-		session.ChannelMessageDelete(channelID, message.ID)
-	}()
 
 	command, args, err := parseMessage(message.Content)
 	if err != nil {
@@ -111,8 +106,12 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		commandErr = commands.AddNextWeek(bot.mongoDBClient, session, message, args)
 	case commands.CommandRemove:
 		commandErr = commands.Remove(bot.mongoDBClient, session, message, args)
+	case commands.CommandRemoveNextWeek:
+		commandErr = commands.RemoveNextWeek(bot.mongoDBClient, session, message, args)
 	case commands.CommandCheckWeek:
 		commandErr = commands.CheckWeek(bot.mongoDBClient, session, message, args)
+	case commands.CommandHelp:
+		commandErr = commands.Help(bot.mongoDBClient, session, message, args)
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
 	}

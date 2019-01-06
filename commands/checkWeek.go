@@ -3,6 +3,7 @@ package commands
 import (
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/Josmomo/RPG-Discord-Bot/database"
 	"github.com/Josmomo/RPG-Discord-Bot/utils"
@@ -16,6 +17,11 @@ const CommandCheckWeek = "checkWeek"
 //CheckWeek
 func CheckWeek(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
 	year, week, err := utils.GetYearWeek()
+	if err != nil {
+		logrus.WithFields(utils.Locate()).Error(err.Error())
+		t := time.Now()
+		year, week = t.ISOWeek()
+	}
 	weeks, err := parseCheckWeekArgs(args)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
