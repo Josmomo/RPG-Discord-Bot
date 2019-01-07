@@ -84,8 +84,7 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 	logrus.WithFields(utils.Locate()).Info("Content=" + message.Content)
 
 	user := message.Author
-	channelID := message.ChannelID
-	if user.ID == bot.ID || user.Bot || channelID != constants.BotChannelID {
+	if user.ID == bot.ID || user.Bot {
 		// Do nothing, a bot wrote this message
 		return
 	}
