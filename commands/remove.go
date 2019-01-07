@@ -11,13 +11,12 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//CommandAdd
-const CommandAdd = "add"
-const CheckMark = ":white_check_mark:"
+//CommandRemove
+const CommandRemove = "remove"
 
-//Add
-func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
-	weekdays, err := parseAddArgs(args)
+//Remove
+func Remove(mongoDBClient database.MongoDBClient, session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
+	weekdays, err := parseRemoveArgs(args)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err
@@ -28,7 +27,7 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 		t := time.Now()
 		year, week = t.ISOWeek()
 	}
-	entry, err := mongoDBClient.GetDocFromIndex(message.Author.ID, year, week)
+	entry, err := mongoDBClient.GetDocFromIndex(message.Author.Mention(), year, week)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		entry.UserID = message.Author.ID
@@ -38,25 +37,25 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 	}
 	entry.UserName = message.Author.Username
 	if utils.ContainsInt(weekdays, 1) {
-		entry.Monday = true
+		entry.Monday = false
 	}
 	if utils.ContainsInt(weekdays, 2) {
-		entry.Tuesday = true
+		entry.Tuesday = false
 	}
 	if utils.ContainsInt(weekdays, 3) {
-		entry.Wednesday = true
+		entry.Wednesday = false
 	}
 	if utils.ContainsInt(weekdays, 4) {
-		entry.Thursday = true
+		entry.Thursday = false
 	}
 	if utils.ContainsInt(weekdays, 5) {
-		entry.Friday = true
+		entry.Friday = false
 	}
 	if utils.ContainsInt(weekdays, 6) {
-		entry.Saturday = true
+		entry.Saturday = false
 	}
 	if utils.ContainsInt(weekdays, 7) {
-		entry.Sunday = true
+		entry.Sunday = false
 	}
 
 	err = mongoDBClient.UpsertWeek(entry)
@@ -65,7 +64,7 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 		return err
 	}
 
-	messageString := message.Author.Mention() + " can now play these days for week " + strconv.Itoa(entry.Week) + ":"
+	messageString := message.Author.Mention() + " removed some days and can now play these days for week " + strconv.Itoa(entry.Week) + ":"
 	if entry.Monday {
 		messageString += "\n" + CheckMark + " Monday"
 	}
@@ -101,13 +100,13 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 	return nil
 }
 
-func parseAddArgs(adds []string) ([]int, error) {
-	regexpAdd := regexp.MustCompile(`^[1234567]$`)
+func parseRemoveArgs(removes []string) ([]int, error) {
+	regexpRemove := regexp.MustCompile(`^[1234567]$`)
 	ret := []int{}
 
-	for _, add := range adds {
-		if regexpAdd.MatchString(add) {
-			day, err := strconv.Atoi(add)
+	for _, remove := range removes {
+		if regexpRemove.MatchString(remove) {
+			day, err := strconv.Atoi(remove)
 			if err != nil {
 				logrus.WithFields(utils.Locate()).Error(err.Error())
 				return []int{}, err

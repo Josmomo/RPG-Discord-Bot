@@ -25,16 +25,20 @@ func Roll(session *discordgo.Session, message *discordgo.MessageCreate, args []s
 	noRolls := len(rolls)
 	if noRolls > 1 {
 		for _, roll := range rolls[:noRolls-1] {
-			messageString += "\n :game_die: " + strconv.Itoa(roll)
+			messageString += " " + strconv.Itoa(roll) + ","
 		}
-		messageString += "\n:game_die: " + strconv.Itoa(rolls[len(rolls)-1])
+		messageString += " " + strconv.Itoa(rolls[len(rolls)-1])
 	} else if noRolls == 1 {
-		messageString = "\n:game_die: " + strconv.Itoa(rolls[0])
+		messageString = strconv.Itoa(rolls[0])
 	} else {
 		messageString = "No dices to roll"
 	}
 
-	session.ChannelMessageSend(message.ChannelID, message.Author.Mention()+messageString)
+	_, err = session.ChannelMessageSend(message.ChannelID, message.Author.Mention()+":game_die:"+messageString)
+	if err != nil {
+		logrus.WithFields(utils.Locate()).Error(err.Error())
+		return err
+	}
 	return nil
 }
 

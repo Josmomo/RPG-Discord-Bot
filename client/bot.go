@@ -6,6 +6,7 @@ import (
 
 	"github.com/Josmomo/RPG-Discord-Bot/commands"
 	"github.com/Josmomo/RPG-Discord-Bot/constants"
+	"github.com/Josmomo/RPG-Discord-Bot/database"
 	"github.com/Josmomo/RPG-Discord-Bot/utils"
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
@@ -13,10 +14,11 @@ import (
 
 //Bot struct
 type Bot struct {
-	ID           string
-	session      *discordgo.Session
-	user         *discordgo.User
-	closeChannel chan bool
+	ID            string
+	session       *discordgo.Session
+	user          *discordgo.User
+	closeChannel  chan bool
+	mongoDBClient database.MongoDBClient
 }
 
 //CreateBot create and returns a new Bot
@@ -28,6 +30,15 @@ func CreateBot() *Bot {
 //Run starts the bot
 func (bot *Bot) Run() {
 	var err error
+
+	// Create MongoDBClient
+	mongoDBClient, err := database.CreateNewClient()
+	if err != nil {
+		logrus.WithFields(utils.Locate()).Error(err.Error())
+		return
+	}
+	bot.mongoDBClient = mongoDBClient
+	//defer bot.mongoDBClient.Session.Close()
 
 	// Create a new Discord session
 	bot.session, err = discordgo.New("Bot " + constants.Token)
@@ -73,8 +84,7 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 	logrus.WithFields(utils.Locate()).Info("Content=" + message.Content)
 
 	user := message.Author
-	channelID := message.ChannelID
-	if user.ID == bot.ID || user.Bot || channelID != constants.BotChannelID {
+	if user.ID == bot.ID || user.Bot {
 		// Do nothing, a bot wrote this message
 		return
 	}
@@ -85,19 +95,27 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		return
 	}
 
+	commandErr := error(nil)
 	switch command {
 	case commands.CommandRoll:
-		err := commands.Roll(session, message, args)
-		if err != nil {
-			return
-		}
+		commandErr = commands.Roll(session, message, args)
 	case commands.CommandAdd:
-		err := commands.Add(session, message, args)
-		if err != nil {
-			return
-		}
+		commandErr = commands.Add(bot.mongoDBClient, session, message, args)
+	case commands.CommandAddNextWeek:
+		commandErr = commands.AddNextWeek(bot.mongoDBClient, session, message, args)
+	case commands.CommandRemove:
+		commandErr = commands.Remove(bot.mongoDBClient, session, message, args)
+	case commands.CommandRemoveNextWeek:
+		commandErr = commands.RemoveNextWeek(bot.mongoDBClient, session, message, args)
+	case commands.CommandCheckWeek:
+		commandErr = commands.CheckWeek(bot.mongoDBClient, session, message, args)
+	case commands.CommandHelp:
+		commandErr = commands.Help(bot.mongoDBClient, session, message, args)
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
+	}
+	if commandErr != nil {
+		return
 	}
 }
 
