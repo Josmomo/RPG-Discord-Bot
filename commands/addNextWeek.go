@@ -30,7 +30,8 @@ func AddNextWeek(mongoDBClient database.MongoDBClient, session *discordgo.Sessio
 	entry, err := mongoDBClient.GetDocFromIndex(message.Author.Mention(), year, week)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
-		entry.UserID = message.Author.Mention()
+		entry.UserID = message.Author.ID
+		entry.UserName = message.Author.Username
 		entry.Year = year
 		entry.Week = week
 	}
