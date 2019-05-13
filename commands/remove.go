@@ -27,7 +27,7 @@ func Remove(mongoDBClient database.MongoDBClient, session *discordgo.Session, me
 		t := time.Now()
 		year, week = t.ISOWeek()
 	}
-	entry, err := mongoDBClient.GetDocFromIndex(message.Author.Mention(), year, week)
+	entry, err := mongoDBClient.GetDocFromIndex(message.Author.ID, year, week)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		entry.UserID = message.Author.ID
@@ -86,7 +86,14 @@ func Remove(mongoDBClient database.MongoDBClient, session *discordgo.Session, me
 	if entry.Sunday {
 		messageString += "\n" + CheckMark + " Sunday"
 	}
-	botMessage, err := session.ChannelMessageSend(message.ChannelID, messageString)
+
+	channelID := message.ChannelID
+	userCannelID, err := session.UserChannelCreate(message.Author.ID)
+	if err == nil {
+		channelID = userCannelID.ID
+	}
+
+	botMessage, err := session.ChannelMessageSend(channelID, messageString)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err

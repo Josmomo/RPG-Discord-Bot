@@ -87,7 +87,13 @@ func Add(mongoDBClient database.MongoDBClient, session *discordgo.Session, messa
 	if entry.Sunday {
 		messageString += "\n" + CheckMark + " Sunday"
 	}
-	botMessage, err := session.ChannelMessageSend(message.ChannelID, messageString)
+	channelID := message.ChannelID
+	userCannelID, err := session.UserChannelCreate(message.Author.ID)
+	if err == nil {
+		channelID = userCannelID.ID
+	}
+
+	botMessage, err := session.ChannelMessageSend(channelID, messageString)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err
