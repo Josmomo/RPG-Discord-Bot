@@ -16,6 +16,14 @@ const CommandRoll = "roll"
 
 //Roll makes a dice roll from input and writes a message in channel
 func Roll(session *discordgo.Session, message *discordgo.MessageCreate, args []string) error {
+	defer func() {
+		session.ChannelMessageDelete(message.ChannelID, message.ID)
+	}()
+	channelID := message.ChannelID
+	receiver := parseHiddenRollReceiver(args[len(args)-1])
+	if receiver != "" {
+		args = args[:len(args)-1]
+	}
 	rolls, err := parseRollArgs(args)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
@@ -34,14 +42,20 @@ func Roll(session *discordgo.Session, message *discordgo.MessageCreate, args []s
 		messageString = "No dices to roll"
 	}
 
-	_, err = session.ChannelMessageSend(message.ChannelID, message.Author.Mention()+":game_die:"+messageString)
+	if receiver != "" {
+		userCannelID, err := session.UserChannelCreate(receiver)
+		if err == nil {
+			channelID = userCannelID.ID
+		} else {
+			channelID = "1"
+		}
+	}
+
+	_, err = session.ChannelMessageSend(channelID, message.Author.Mention()+":game_die:"+messageString)
 	if err != nil {
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err
 	}
-	defer func() {
-		session.ChannelMessageDelete(message.ChannelID, message.ID)
-	}()
 
 	return nil
 }
@@ -72,4 +86,14 @@ func parseRollArgs(rolls []string) ([]int, error) {
 	}
 
 	return ret, nil
+}
+
+func parseHiddenRollReceiver(receiver string) string {
+	regexpReceiver := regexp.MustCompile(`^<@\d+>$`)
+
+	if regexpReceiver.MatchString(receiver) {
+		return receiver[2 : len(receiver)-1]
+	}
+
+	return ""
 }

@@ -26,8 +26,9 @@ func Help(mongoDBClient database.MongoDBClient, session *discordgo.Session, mess
 		Remove days from next week
 	checkWeek <1-53>?
 		Check who can play on any given week, current week if nothing is specified
-	roll <1-99D1-999>?
+	roll <1-99D1-999>? <@user>?
 		Roll a dice of your choice, rolls a D20 if nothing is specified
+		If a user is @:ed, the roll will be hidden and sent to them
 	play
 		Check if anyone wants to play with a poll
 	help
