@@ -28,6 +28,8 @@ func Help(mongoDBClient database.MongoDBClient, session *discordgo.Session, mess
 		Check who can play on any given week, current week if nothing is specified
 	roll <1-99D1-999>?
 		Roll a dice of your choice, rolls a D20 if nothing is specified
+	play
+		Check if anyone wants to play with a poll
 	help
 		Shows help message
 ` + "```"

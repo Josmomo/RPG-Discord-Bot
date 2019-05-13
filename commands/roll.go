@@ -39,6 +39,10 @@ func Roll(session *discordgo.Session, message *discordgo.MessageCreate, args []s
 		logrus.WithFields(utils.Locate()).Error(err.Error())
 		return err
 	}
+	defer func() {
+		session.ChannelMessageDelete(message.ChannelID, message.ID)
+	}()
+
 	return nil
 }
 

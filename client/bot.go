@@ -111,6 +111,8 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 		commandErr = commands.CheckWeek(bot.mongoDBClient, session, message, args)
 	case commands.CommandHelp:
 		commandErr = commands.Help(bot.mongoDBClient, session, message, args)
+	case commands.CommandPlay:
+		commandErr = commands.Play(bot.mongoDBClient, session, message, args)
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
 	}
