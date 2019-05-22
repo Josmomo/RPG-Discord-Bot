@@ -99,20 +99,28 @@ func (bot *Bot) commandHandler(session *discordgo.Session, message *discordgo.Me
 	switch command {
 	case commands.CommandRoll:
 		commandErr = commands.Roll(session, message, args)
+		break
 	case commands.CommandAdd:
 		commandErr = commands.Add(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandAddNextWeek:
 		commandErr = commands.AddNextWeek(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandRemove:
 		commandErr = commands.Remove(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandRemoveNextWeek:
 		commandErr = commands.RemoveNextWeek(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandCheckWeek:
 		commandErr = commands.CheckWeek(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandHelp:
 		commandErr = commands.Help(bot.mongoDBClient, session, message, args)
+		break
 	case commands.CommandPlay:
 		commandErr = commands.Play(bot.mongoDBClient, session, message, args)
+		break
 	default:
 		logrus.WithFields(utils.Locate()).Info("Command not recognized")
 	}

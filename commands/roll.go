@@ -20,7 +20,10 @@ func Roll(session *discordgo.Session, message *discordgo.MessageCreate, args []s
 		session.ChannelMessageDelete(message.ChannelID, message.ID)
 	}()
 	channelID := message.ChannelID
-	receiver := parseHiddenRollReceiver(args[len(args)-1])
+	receiver := ""
+	if len(args) > 0 {
+		receiver = parseHiddenRollReceiver(args[len(args)-1])
+	}
 	if receiver != "" {
 		args = args[:len(args)-1]
 	}
